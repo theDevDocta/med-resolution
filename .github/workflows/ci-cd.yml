@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
 
 jobs:
@@ -16,13 +16,15 @@ jobs:
 
   deploy:
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Coolify deployment
+        # Méthode GET conforme à la doc officielle Coolify (deploy webhook) :
+        # https://coolify.io/docs/applications/ci-cd/github/actions
         run: |
-          curl --fail --show-error -X POST "${COOLIFY_WEBHOOK_URL}" \
-            -H "Authorization: Bearer ${COOLIFY_WEBHOOK_TOKEN}"
+          curl --fail --show-error --request GET "${COOLIFY_WEBHOOK_URL}" \
+            --header "Authorization: Bearer ${COOLIFY_WEBHOOK_TOKEN}"
         env:
           COOLIFY_WEBHOOK_URL: ${{ secrets.COOLIFY_WEBHOOK_URL }}
           COOLIFY_WEBHOOK_TOKEN: ${{ secrets.COOLIFY_WEBHOOK_TOKEN }}
