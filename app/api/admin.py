@@ -8,7 +8,8 @@ partagée pour que les requêtes suivantes lisent la nouvelle base.
 import threading
 
 import httpx
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi.security import APIKeyHeader
 
 from app.core import config
 from app.db.connection import reset_connection
@@ -22,8 +23,10 @@ router = APIRouter()
 # parallèle corromprait l'import en cours.
 _update_lock = threading.Lock()
 
+_admin_key_header = APIKeyHeader(name="X-Admin-Key", scheme_name="AdminKeyAuth", auto_error=False)
 
-def verify_admin_key(x_admin_key: str | None = Header(default=None)) -> None:
+
+def verify_admin_key(x_admin_key: str | None = Security(_admin_key_header)) -> None:
     """Vérifie X-Admin-Key contre ADMIN_API_KEY si celle-ci est configurée."""
     if config.ADMIN_API_KEY and x_admin_key != config.ADMIN_API_KEY:
         raise HTTPException(status_code=401, detail="Clé d'administration invalide ou manquante.")

@@ -123,6 +123,22 @@ Voir `.env.example`. Les plus utiles :
 - `BDPM_DATA_DIR` : répertoire contenant `raw/` et `bdpm.sqlite`.
 - `PORT` : port d'écoute de l'API.
 
+## Génération de client (OpenAPI)
+
+Le schéma OpenAPI est exporté dans [`openapi.json`](openapi.json) (déclare
+`ApiKeyAuth` / `X-API-Key` et `AdminKeyAuth` / `X-Admin-Key` comme schémas
+d'authentification). Utilisable directement avec un générateur de client
+(`openapi-generator`, `orval`, `openapi-typescript`...).
+
+Pour le régénérer après une modification des routes/schémas :
+
+```bash
+uv run python -m scripts.export_openapi
+```
+
+L'API expose aussi le schéma en direct sur `/openapi.json` et une UI
+interactive sur `/docs`.
+
 ## Déploiement & CI/CD
 
 Le service est pensé comme un microservice autonome, déployé sur une

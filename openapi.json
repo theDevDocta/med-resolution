@@ -1,0 +1,575 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BDPM Drug Resolver",
+    "description": "Détection, recherche et correction de noms de médicaments français à partir de la Base de Données Publique des Médicaments (BDPM). Correspondance lexicale locale, sans dépendance externe au runtime — ne constitue pas une validation médicale ou pharmaceutique.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "summary": "Search",
+        "operationId": "search_search_get",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "commercialized_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Commercialized Only"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resolve": {
+      "post": {
+        "summary": "Resolve",
+        "operationId": "resolve_resolve_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/update-database": {
+      "post": {
+        "summary": "Update Database",
+        "operationId": "update_database_admin_update_database_post",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "AdminKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip_download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Skip Download"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDatabaseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "database_loaded": {
+            "type": "boolean",
+            "title": "Database Loaded"
+          },
+          "drug_count": {
+            "type": "integer",
+            "title": "Drug Count"
+          },
+          "alias_count": {
+            "type": "integer",
+            "title": "Alias Count"
+          },
+          "database_last_updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Database Last Updated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "database_loaded",
+          "drug_count",
+          "alias_count"
+        ],
+        "title": "HealthResponse"
+      },
+      "ResolveCandidate": {
+        "properties": {
+          "cis": {
+            "type": "string",
+            "title": "Cis"
+          },
+          "canonical_name": {
+            "type": "string",
+            "title": "Canonical Name"
+          },
+          "matched_alias": {
+            "type": "string",
+            "title": "Matched Alias"
+          },
+          "substance_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Substance Name"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cis",
+          "canonical_name",
+          "matched_alias",
+          "score",
+          "confidence",
+          "evidence"
+        ],
+        "title": "ResolveCandidate"
+      },
+      "ResolveInput": {
+        "properties": {
+          "suspected_term": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspected Term"
+          },
+          "normalized_term": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Normalized Term"
+          }
+        },
+        "type": "object",
+        "required": [
+          "suspected_term",
+          "normalized_term"
+        ],
+        "title": "ResolveInput"
+      },
+      "ResolveRequest": {
+        "properties": {
+          "verbatim": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Verbatim"
+          },
+          "llm_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llm Version"
+          },
+          "suspected_term": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspected Term"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 5
+          }
+        },
+        "type": "object",
+        "required": [
+          "verbatim"
+        ],
+        "title": "ResolveRequest"
+      },
+      "ResolveResponse": {
+        "properties": {
+          "input": {
+            "$ref": "#/components/schemas/ResolveInput"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/ResolveCandidate"
+            },
+            "type": "array",
+            "title": "Candidates"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "default": "Correspondance lexicale automatique. Ne constitue pas une validation médicale ou pharmaceutique."
+          },
+          "notice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input",
+          "candidates"
+        ],
+        "title": "ResolveResponse"
+      },
+      "SearchResponse": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "normalized_query": {
+            "type": "string",
+            "title": "Normalized Query"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResultItem"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "default": "Correspondance lexicale automatique. Ne constitue pas une validation médicale ou pharmaceutique."
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "normalized_query",
+          "results"
+        ],
+        "title": "SearchResponse"
+      },
+      "SearchResultItem": {
+        "properties": {
+          "cis": {
+            "type": "string",
+            "title": "Cis"
+          },
+          "canonical_name": {
+            "type": "string",
+            "title": "Canonical Name"
+          },
+          "matched_alias": {
+            "type": "string",
+            "title": "Matched Alias"
+          },
+          "alias_type": {
+            "type": "string",
+            "title": "Alias Type"
+          },
+          "substance_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Substance Name"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "commercialization_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commercialization Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cis",
+          "canonical_name",
+          "matched_alias",
+          "alias_type",
+          "score"
+        ],
+        "title": "SearchResultItem"
+      },
+      "UpdateDatabaseResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "drug_count": {
+            "type": "integer",
+            "title": "Drug Count"
+          },
+          "alias_count": {
+            "type": "integer",
+            "title": "Alias Count"
+          },
+          "rejected_ratio": {
+            "type": "number",
+            "title": "Rejected Ratio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "drug_count",
+          "alias_count",
+          "rejected_ratio"
+        ],
+        "title": "UpdateDatabaseResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "AdminKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Admin-Key"
+      }
+    }
+  }
+}
