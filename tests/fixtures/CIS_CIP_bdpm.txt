@@ -1,0 +1,6 @@
+60002283	3400935	plaquette(s) PVC-Aluminium de 8 comprime(s)	Presentation active	Commercialisee	01/01/2000	3400933400935	Oui	65%	1.16
+60003152	3400936	plaquette(s) PVC-Aluminium de 16 comprime(s)	Presentation active	Commercialisee	01/01/2001	3400933400936	Oui	65%	2.18
+60004521	3400937	plaquette(s) PVC-Aluminium de 12 gelule(s)	Presentation active	Commercialisee	01/01/2002	3400933400937	Oui	65%	3.05
+60005678	3400938	plaquette(s) PVC-Aluminium de 30 comprime(s)	Presentation active	Commercialisee	01/01/2003	3400933400938	Oui	65%	4.12
+60006789	3400939	plaquette(s) PVC-Aluminium de 30 comprime(s)	Presentation abrogee	Non commercialisee	01/01/2004	3400933400939	Non	0%	-
+60007890	3400940	1 seringue preremplie en verre de 1 ml avec dispositif de securite de l aiguille	Presentation active	Commercialisee	01/01/2005	3400933400940	Oui	65%	5.00

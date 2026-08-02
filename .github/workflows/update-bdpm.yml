@@ -1,0 +1,21 @@
+name: Update BDPM database
+
+on:
+  schedule:
+    # Tous les dimanches à 3h UTC — la BDPM ne change pas assez souvent
+    # pour justifier un rythme plus fréquent.
+    - cron: "0 3 * * 0"
+  workflow_dispatch: {}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger database rebuild
+        run: |
+          curl --fail --show-error \
+            -X POST "${BDPM_SERVICE_URL}/admin/update-database" \
+            -H "X-Admin-Key: ${ADMIN_API_KEY}"
+        env:
+          BDPM_SERVICE_URL: ${{ secrets.BDPM_SERVICE_URL }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}

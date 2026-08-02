@@ -1,0 +1,19 @@
+services:
+  bdpm-resolver:
+    build: .
+    ports:
+      - "${PORT:-8090}:8090"
+    env_file:
+      - .env
+    volumes:
+      - bdpm-data:/app/data
+    healthcheck:
+      test: ["CMD", "uv", "run", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  bdpm-data:

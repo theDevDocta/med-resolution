@@ -1,0 +1,6 @@
+60002283	DOLIPRANE 1000 mg, comprime	Comprime	orale	Autorisation active	Procedure nationale	Commercialisee	01/01/2000	-	-	SANOFI	Non
+60003152	DAFALGAN 500 mg, comprime	Comprime	orale	Autorisation active	Procedure nationale	Commercialisee	01/01/2001	-	-	UPSA	Non
+60004521	AMOXICILLINE BIOGARAN 500 mg, gelule	Gelule	orale	Autorisation active	Procedure nationale	Commercialisee	01/01/2002	-	-	BIOGARAN	Non
+60005678	GLUCOPHAGE 850 mg, comprime pellicule	Comprime pellicule	orale	Autorisation active	Procedure nationale	Commercialisee	01/01/2003	-	-	MERCK	Non
+60006789	LOPRESSOR 100 mg, comprime	Comprime	orale	Autorisation active	Procedure nationale	Non commercialisee	01/01/2004	-	-	NOVARTIS	Non
+60007890	VACCITEST 60 U, suspension injectable en seringue preremplie	Suspension injectable	IM	Autorisation active	Procedure nationale	Commercialisee	01/01/2005	-	-	VACCINOR	Non
