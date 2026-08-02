@@ -88,3 +88,17 @@ def test_update_database_accepts_correct_admin_key(admin_client, monkeypatch):
         headers={"X-Admin-Key": "secret-key"},
     )
     assert response.status_code == 200
+
+
+def test_update_database_requires_api_key_when_configured(admin_client, monkeypatch):
+    monkeypatch.setattr(config, "API_KEY", "service-key")
+
+    response = admin_client.post("/admin/update-database", params={"skip_download": "true"})
+    assert response.status_code == 401
+
+    response = admin_client.post(
+        "/admin/update-database",
+        params={"skip_download": "true"},
+        headers={"X-API-Key": "service-key"},
+    )
+    assert response.status_code == 200

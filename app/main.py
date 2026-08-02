@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
 from app.api import admin, health, resolve, search
+from app.core.security import verify_api_key
 
 app = FastAPI(
     title="BDPM Drug Resolver",
@@ -13,6 +14,6 @@ app = FastAPI(
 )
 
 app.include_router(health.router)
-app.include_router(search.router)
-app.include_router(resolve.router)
-app.include_router(admin.router)
+app.include_router(search.router, dependencies=[Depends(verify_api_key)])
+app.include_router(resolve.router, dependencies=[Depends(verify_api_key)])
+app.include_router(admin.router, dependencies=[Depends(verify_api_key)])

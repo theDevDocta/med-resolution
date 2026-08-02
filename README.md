@@ -60,7 +60,14 @@ persistant, donc une seule fois).
 
 ## API
 
+Toutes les routes sauf `/health` sont protégées si `API_KEY` est définie
+(header `X-API-Key`, `401` si absent/incorrect). En dev local, sans cette
+variable, elles restent ouvertes.
+
 ### `GET /health`
+
+Toujours accessible sans authentification (utilisé par les sondes de santé
+Docker/Coolify/GitHub Actions).
 
 ```bash
 curl http://localhost:8090/health
@@ -69,8 +76,8 @@ curl http://localhost:8090/health
 ### `GET /search`
 
 ```bash
-curl "http://localhost:8090/search?q=amoxiciline&limit=5"
-curl "http://localhost:8090/search?q=doliprane&commercialized_only=false"
+curl "http://localhost:8090/search?q=amoxiciline&limit=5" -H "X-API-Key: $API_KEY"
+curl "http://localhost:8090/search?q=doliprane&commercialized_only=false" -H "X-API-Key: $API_KEY"
 ```
 
 ### `POST /resolve`
@@ -78,6 +85,7 @@ curl "http://localhost:8090/search?q=doliprane&commercialized_only=false"
 ```bash
 curl -X POST http://localhost:8090/resolve \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: $API_KEY" \
   -d '{
         "verbatim": "le patient prend de l amoxiciline cinq cents",
         "llm_version": "le patient prend de l'\''amoxicilline 500 mg",
@@ -96,14 +104,15 @@ fois (`409` si déjà en cours) ; `422` si l'import échoue (fichiers manquants,
 trop de lignes rejetées, médicaments de contrôle introuvables...).
 
 Si `ADMIN_API_KEY` est définie, l'appel doit inclure le header
-`X-Admin-Key` (sinon `401`). En dev local, sans cette variable, l'endpoint
-reste ouvert.
+`X-Admin-Key` (sinon `401`) — en plus de `X-API-Key` si `API_KEY` est
+également définie. En dev local, sans ces variables, l'endpoint reste
+ouvert.
 
 ```bash
 curl -X POST http://localhost:8090/admin/update-database \
-  -H "X-Admin-Key: $ADMIN_API_KEY"
+  -H "X-Admin-Key: $ADMIN_API_KEY" -H "X-API-Key: $API_KEY"
 curl -X POST "http://localhost:8090/admin/update-database?skip_download=true" \
-  -H "X-Admin-Key: $ADMIN_API_KEY"  # réutilise data/raw/
+  -H "X-Admin-Key: $ADMIN_API_KEY" -H "X-API-Key: $API_KEY"  # réutilise data/raw/
 ```
 
 ## Variables d'environnement
@@ -147,8 +156,9 @@ push sur main ──► CI (tests) ──► déploiement (webhook Coolify)
 | `COOLIFY_WEBHOOK_TOKEN` | Token d'authentification du webhook Coolify                  |
 | `BDPM_SERVICE_URL`      | URL publique du service déployé (ex: `https://bdpm.example.com`) |
 | `ADMIN_API_KEY`         | Même valeur que la variable d'environnement `ADMIN_API_KEY` du service |
+| `API_KEY`               | Même valeur que la variable d'environnement `API_KEY` du service (si définie) |
 
-Ces trois derniers secrets ne peuvent être renseignés qu'une fois le service
+Ces quatre derniers secrets ne peuvent être renseignés qu'une fois le service
 déployé une première fois (manuellement) sur Coolify.
 
 ## Limites (version 1)

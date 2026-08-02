@@ -1,3 +1,6 @@
+from app.core import config
+
+
 def test_health_endpoint(api_client):
     response = api_client.get("/health")
     assert response.status_code == 200
@@ -66,3 +69,34 @@ def test_health_when_database_missing(monkeypatch, tmp_path):
     assert response.status_code == 200
     body = response.json()
     assert body["database_loaded"] is False
+
+
+def test_health_ignores_api_key_when_configured(api_client, monkeypatch):
+    monkeypatch.setattr(config, "API_KEY", "secret-key")
+
+    response = api_client.get("/health")
+    assert response.status_code == 200
+
+
+def test_search_requires_api_key_when_configured(api_client, monkeypatch):
+    monkeypatch.setattr(config, "API_KEY", "secret-key")
+
+    response = api_client.get("/search", params={"q": "amoxiciline"})
+    assert response.status_code == 401
+
+    response = api_client.get(
+        "/search", params={"q": "amoxiciline"}, headers={"X-API-Key": "secret-key"}
+    )
+    assert response.status_code == 200
+
+
+def test_resolve_requires_api_key_when_configured(api_client, monkeypatch):
+    monkeypatch.setattr(config, "API_KEY", "secret-key")
+
+    response = api_client.post("/resolve", json={"verbatim": "amoxiciline"})
+    assert response.status_code == 401
+
+    response = api_client.post(
+        "/resolve", json={"verbatim": "amoxiciline"}, headers={"X-API-Key": "secret-key"}
+    )
+    assert response.status_code == 200

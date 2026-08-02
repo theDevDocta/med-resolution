@@ -53,6 +53,12 @@ CONFIDENCE_THRESHOLDS = {
 # Vide en dev local : aucune vérification n'est imposée.
 ADMIN_API_KEY = os.environ.get("ADMIN_API_KEY", "")
 
+# --- Authentification microservice ---
+# Si définie, protège /search, /resolve et /admin (header X-API-Key).
+# /health reste toujours accessible sans clé (sondes de santé).
+# Vide en dev local : aucune vérification n'est imposée.
+API_KEY = os.environ.get("API_KEY", "")
+
 # --- Contrôles d'import ---
 CONTROL_DRUGS = ["paracetamol", "doliprane", "amoxicilline", "metformine", "metoprolol"]
 MAX_REJECTED_ROWS_RATIO = 0.20
